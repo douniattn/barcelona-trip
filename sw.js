@@ -1,6 +1,6 @@
 'use strict';
-const CACHE = 'barcelone-a-deux-shell-v6';
-const FILES = ['./', './index.html', './styles.css', './data.js', './app.js', './icon.svg'];
+const CACHE = 'barcelone-a-deux-shell-v7';
+const FILES = ['./', './index.html', './styles.css', './data.js', './weather.js', './app.js', './icon.svg'];
 
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(FILES)).then(() => self.skipWaiting()));

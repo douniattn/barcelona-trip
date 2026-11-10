@@ -102,18 +102,58 @@ function hotelCard() {
     <details class="trip-info"><summary>Infos voyage</summary><p>Jeudi : arrivée communiquée à 10 h 45. Première sortie ensemble à 15 h.</p><p><a href="#today/4">Retrouver vos vols dans la journée du lundi.</a></p>${mapsButton('airport', 'Retrouver l’aéroport', 'text-button')}</details></section>`;
 }
 function weatherFor(day) {
+  const live = Weather.day(day.date);
+  if (live) return { ...live, forecast: live.text, live: true };
   const edit = state.weather[day.date];
-  return edit && typeof edit.range === 'string' && typeof edit.forecast === 'string' ? edit : { range: day.weather, forecast: day.forecast };
+  return { ...(edit && typeof edit.range === 'string' && typeof edit.forecast === 'string' ? edit : { range: day.weather, forecast: day.forecast }), icon: day.icon, live: false };
+}
+function weatherSummary(day) {
+  const weather = weatherFor(day);
+  return `${escapeHTML(weather.forecast)}${weather.live ? ` · Précipitations : ${weather.probability === null ? 'probabilité indisponible' : `${weather.probability} % au maximum sur une heure`}${weather.amount === null ? '' : ` · ${weather.amount.toLocaleString('fr-FR')} mm prévus`}` : ' · Note de planification, non actualisée. Probabilité de pluie indisponible.'}`;
+}
+function weatherStatus() {
+  const status = Weather.status();
+  const date = status.receivedAt ? new Intl.DateTimeFormat('fr-FR', { timeZone: 'Europe/Madrid', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }).format(status.receivedAt) : '';
+  return `<div class="weather-status" role="status"><p>${date ? `Prévisions récupérées le ${date}, heure de Barcelone.${status.stale ? ' Données en mémoire, non actualisées.' : ''}` : 'Aucune prévision actualisée reçue pour le moment.'}${status.loading ? ' Actualisation en cours…' : ''}</p>
+    ${status.error || status.offline ? `<p class="weather-error">${escapeHTML(status.error || 'Vous êtes hors ligne. Les prévisions affichées proviennent de la mémoire de cet appareil.')}</p>` : ''}
+    ${status.storageError ? `<p class="weather-error">${escapeHTML(status.storageError)}</p>` : ''}
+    <p>Source : ${external('https://open-meteo.com/', 'Open-Meteo')} · Prévisions, pas une observation en direct. Actualisation toutes les 30 min lorsque le carnet est ouvert.</p>
+    <button class="btn secondary small" data-weather-refresh ${status.loading ? 'disabled' : ''}>${status.loading ? 'Actualisation…' : 'Actualiser la météo'}</button></div>`;
+}
+function weatherDetails(day) {
+  const weather = weatherFor(day);
+  const hours = weather.live ? weather.hours.filter(hour => hour.time >= '08:00' && hour.time <= '22:00') : [];
+  return `<div class="weather-card-top"><span class="weather-symbol" aria-hidden="true">${weather.icon}</span><h3>${escapeHTML(weather.range)}</h3></div><p>${weatherSummary(day)}</p>
+    ${weather.live ? '' : '<p class="small">Cette date n’est pas disponible dans les prévisions reçues. Note initiale consultée le 10 novembre 2026, ou note personnelle de cet appareil.</p>'}
+    ${hours.length ? `<details><summary>Possibilités de pluie heure par heure · 8 h à 22 h</summary><p class="small">Probabilité de précipitations supérieures à 0,1 mm pour l’heure qui précède l’horaire affiché. Le pourcentage quotidien est le maximum horaire, pas la probabilité de pluie sur toute la journée.</p><div class="rain-hours">${hours.map(hour => `<div><span>${hour.time.replace(':', ' h ')}</span><strong>${hour.probability === null ? 'Indisponible' : `${hour.probability} %`}</strong><span>${hour.amount === null ? 'Quantité inconnue' : `${hour.amount.toLocaleString('fr-FR')} mm`}</span></div>`).join('')}</div></details>` : ''}
+    ${weatherStatus()}`;
+}
+function refreshWeatherUI() {
+  main.querySelectorAll('[data-weather-header]').forEach(element => {
+    const day = DAYS.find(day => day.date === element.dataset.weatherHeader);
+    const weather = weatherFor(day);
+    element.innerHTML = `<span class="weather-symbol" aria-hidden="true">${weather.icon}</span><span>${escapeHTML(weather.range)}</span>`;
+    element.setAttribute('aria-label', `${weather.range}, ${weather.forecast}`);
+  });
+  main.querySelectorAll('[data-weather-summary]').forEach(element => {
+    element.innerHTML = weatherSummary(DAYS.find(day => day.date === element.dataset.weatherSummary));
+  });
+  main.querySelectorAll('[data-weather-details]').forEach(element => {
+    const open = element.querySelector('details')?.open;
+    element.innerHTML = weatherDetails(DAYS.find(day => day.date === element.dataset.weatherDetails));
+    if (open && element.querySelector('details')) element.querySelector('details').open = true;
+  });
+  main.querySelectorAll('[data-weather-status]').forEach(element => { element.innerHTML = weatherStatus(); });
 }
 function renderOverview() {
   main.innerHTML = `<div class="section-heading"><div><p class="eyebrow">LE VOYAGE EN UN REGARD</p><h2>Cinq jours à savourer</h2><p>Un fil conducteur, pas une course. Gardez de la place pour l’imprévu.</p></div><span class="section-count">12 → 16 novembre</span></div>
     <div class="overview-layout"><div class="days">${DAYS.map((day, index) => {
       const weather = weatherFor(day);
-      return `<article class="day-card"><div class="day-card-top"><div class="date-block"><span>${day.weekday.slice(0, 3)}.</span><strong>${day.day}</strong><span>NOV.</span></div><div><h3>${day.title}</h3><p class="day-subtitle">${day.subtitle}</p></div><div class="day-weather" aria-label="${escapeHTML(`${weather.range}, ${weather.forecast}`)}"><span class="weather-symbol" aria-hidden="true">${day.icon}</span><span>${escapeHTML(weather.range)}</span></div></div>
-      <div class="mini-timeline">${day.steps.map(step => `${step.route ? `<div class="mini-route">${routeLabel(step.route)} · ${step.route.duration}</div>` : ''}<div class="mini-step"><span class="mini-time">${step.overviewTime}</span><div class="mini-name">${step.summary}${step.optional ? '<span class="mini-badge">En option</span>' : ''}${step.confirm ? '<span class="mini-badge">À confirmer</span>' : ''}${step.visit ? `<span class="mini-price">${priceText(getVisit(step.visit))}</span>` : ''}</div></div>`).join('')}${day.flights ? day.flights.map(flight => `<div class="mini-step"><span class="mini-time">${flight.time}</span><div class="mini-name">${flight.airline} ${flight.number}<span class="mini-price">${flight.label} · Horaire communiqué</span></div></div>`).join('') : ''}<p class="mini-forecast">${escapeHTML(weather.forecast)}</p></div>
+      return `<article class="day-card"><div class="day-card-top"><div class="date-block"><span>${day.weekday.slice(0, 3)}.</span><strong>${day.day}</strong><span>NOV.</span></div><div><h3>${day.title}</h3><p class="day-subtitle">${day.subtitle}</p></div><div class="day-weather" data-weather-header="${day.date}" aria-label="${escapeHTML(`${weather.range}, ${weather.forecast}`)}"><span class="weather-symbol" aria-hidden="true">${weather.icon}</span><span>${escapeHTML(weather.range)}</span></div></div>
+      <div class="mini-timeline">${day.steps.map(step => `${step.route ? `<div class="mini-route">${routeLabel(step.route)} · ${step.route.duration}</div>` : ''}<div class="mini-step"><span class="mini-time">${step.overviewTime}</span><div class="mini-name">${step.summary}${step.optional ? '<span class="mini-badge">En option</span>' : ''}${step.confirm ? '<span class="mini-badge">À confirmer</span>' : ''}${step.visit ? `<span class="mini-price">${priceText(getVisit(step.visit))}</span>` : ''}</div></div>`).join('')}${day.flights ? day.flights.map(flight => `<div class="mini-step"><span class="mini-time">${flight.time}</span><div class="mini-name">${flight.airline} ${flight.number}<span class="mini-price">${flight.label} · Horaire communiqué</span></div></div>`).join('') : ''}<p class="mini-forecast" data-weather-summary="${day.date}">${weatherSummary(day)}</p></div>
       <div class="day-card-bottom"><span class="day-note">${day.note}</span><a class="text-button" href="#today/${index}">Voir la journée <span aria-hidden="true">↗</span></a></div></article>`;
     }).join('')}</div><aside>${hotelCard()}<div class="gentle-note"><strong>Le plaisir de marcher</strong>À pied dès que possible, en taxi ou Uber quand il le faut. Et toujours le droit de faire une pause.</div></aside></div>
-    <p class="practical-note">Prévisions consultées le 10 novembre 2026. Prévisions de planification fournies pour ce carnet, modifiables dans chaque journée. Ce n’est pas de la météo en direct.</p>${tripNote()}`;
+    <div data-weather-status>${weatherStatus()}</div>${tripNote()}`;
 }
 function routeLabel(value) { return value.mode === 'walking' ? 'À pied' : (value.label || 'Voiture'); }
 function activeRoute(value, dayIndex) {
@@ -182,8 +222,8 @@ function shortcuts(day) {
   return `<section class="phrase-shortcut"><h4>Les mots qui vous seront utiles</h4>${day.phrases.map(id => `<button data-large="${id}" lang="es">${getPhrase(id)[1]} <span aria-hidden="true">↗</span></button>`).join('')}<a class="text-button" href="#spanish">Tout l’espagnol pratique ↗</a></section>`;
 }
 function weatherCard(day) {
-  const weather = weatherFor(day);
-  return `<section class="weather-card"><div class="weather-card-top"><span class="weather-symbol" aria-hidden="true">${day.icon}</span><h3>${escapeHTML(weather.range)}</h3></div><p>${escapeHTML(weather.forecast)}</p><p class="small">Prévisions consultées le 10 novembre 2026. ${state.weather[day.date] ? 'Note modifiée sur cet appareil.' : 'Prévisions fournies pour le séjour.'} Ce n’est pas de la météo en direct.</p><details><summary>Modifier votre note météo</summary><form id="weather-form"><label>Températures<input name="range" value="${escapeHTML(weather.range)}" required maxlength="60"></label><label>Prévisions<input name="forecast" value="${escapeHTML(weather.forecast)}" required maxlength="250"></label><button class="btn small" type="submit">Enregistrer la note</button></form></details></section>`;
+  const note = state.weather[day.date] || { range: day.weather, forecast: day.forecast };
+  return `<section class="weather-card"><div data-weather-details="${day.date}">${weatherDetails(day)}</div><details><summary>Votre note météo personnelle</summary><p>Cette note ne remplace pas les prévisions actualisées.</p>${state.weather[day.date] ? `<p>${escapeHTML(note.range)} · ${escapeHTML(note.forecast)}</p>` : ''}<form id="weather-form"><label>Températures<input name="range" value="${escapeHTML(note.range)}" required maxlength="60"></label><label>Votre note<input name="forecast" value="${escapeHTML(note.forecast)}" required maxlength="250"></label><button class="btn small" type="submit">Enregistrer la note</button></form></details></section>`;
 }
 function renderToday() {
   const day = DAYS[selectedDay];
@@ -278,6 +318,7 @@ main.addEventListener('submit', event => {
 main.addEventListener('click', async event => {
   const button = event.target.closest('button');
   if (!button) return;
+  if (button.hasAttribute('data-weather-refresh')) await Weather.refresh();
   if (button.hasAttribute('data-progress')) {
     const step = DAYS[selectedDay].steps.find(item => item.id === button.dataset.step);
     const key = progressKey(selectedDay, step);
@@ -325,6 +366,7 @@ window.addEventListener('afterprint', () => {
 window.addEventListener('hashchange', () => routePage());
 routePage({ scroll: Boolean(location.hash) || tripDates.includes(currentClock.date) });
 if (storageWarning) notify(storageWarning);
+Weather.start(refreshWeatherUI);
 
 setInterval(() => {
   const now = madridNow();
