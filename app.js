@@ -90,9 +90,6 @@ function stepBadges(step) {
 function priceText(visit) {
   return `${visit.approximate ? 'Environ ' : ''}${money(visit.adult)} par adulte · ${money(visit.two)} pour deux`;
 }
-function tripNote() {
-  return `<p class="practical-note">Marche en priorité pour les trajets courts, puis bus ou tram si le parcours complet prend moins de 25 min. Entre 25 et 30 min, privilégiez encore les transports. Uber seulement si marche et transports prennent chacun au moins 30 min, sauf le départ ensemble du lundi vers l’aéroport. Les temps incluent la marche d’accès lorsqu’un bus est indiqué, mais excluent l’attente, les files et les bagages. Vérifiez les départs et perturbations le jour même. Les heures indicatives peuvent glisser. Tous les horaires suivent l’heure locale de Barcelone, Europe/Madrid. Aucun billet n’est présenté comme réservé.</p>`;
-}
 function flightInfo(flights) {
   return `<div class="flight-info">${flights.map(flight => `<p><strong>${flight.time} · ${flight.airline} ${flight.number}</strong><br>${flight.label}</p>`).join('')}<p>Horaires de vol communiqués pour le lundi 16 novembre. Vérifiez les deux cartes d’embarquement et les terminaux avant le départ.</p></div>`;
 }
@@ -153,7 +150,7 @@ function renderOverview() {
       <div class="mini-timeline">${day.steps.map(step => `${step.route ? `<div class="mini-route">${routeLabel(activeRoute(step.route, index))} · ${activeRoute(step.route, index).duration}</div>` : ''}<div class="mini-step"><span class="mini-time">${step.overviewTime}</span><div class="mini-name">${step.summary}${step.optional ? '<span class="mini-badge">En option</span>' : ''}${step.confirm ? '<span class="mini-badge">À confirmer</span>' : ''}${step.visit ? `<span class="mini-price">${priceText(getVisit(step.visit))}</span>` : ''}</div></div>`).join('')}${day.flights ? day.flights.map(flight => `<div class="mini-step"><span class="mini-time">${flight.time}</span><div class="mini-name">${flight.airline} ${flight.number}<span class="mini-price">${flight.label} · Horaire communiqué</span></div></div>`).join('') : ''}<p class="mini-forecast" data-weather-summary="${day.date}">${weatherSummary(day)}</p></div>
       <div class="day-card-bottom"><span class="day-note">${day.note}</span><a class="text-button" href="#today/${index}">Voir la journée <span aria-hidden="true">↗</span></a></div></article>`;
     }).join('')}</div><aside>${hotelCard()}</aside></div>
-    <div data-weather-status>${weatherStatus()}</div>${tripNote()}`;
+    <div data-weather-status>${weatherStatus()}</div>`;
 }
 function routeLabel(value) { return value.mode === 'walking' ? 'À pied' : (value.label || 'Voiture'); }
 function activeRoute(value, dayIndex) {
@@ -235,7 +232,7 @@ function weatherCard(day) {
 function renderToday() {
   const day = DAYS[selectedDay];
   main.innerHTML = `<div class="section-heading"><div><p class="eyebrow">VOTRE JOURNÉE, PAS À PAS</p><h2>${day.weekday} ${day.day} novembre</h2><p>${day.subtitle}</p></div><label class="sr-only" for="day-select">Choisir une journée</label><select id="day-select" class="day-select">${DAYS.map((item, index) => `<option value="${index}" ${selectedDay === index ? 'selected' : ''}>${item.weekday} ${item.day} novembre</option>`).join('')}</select></div>
-    <div class="today-layout"><div><div id="next-step">${nextCard(selectedDay)}</div>${weatherCard(day)}${day.steps.map((step, index) => renderStep(step, index, selectedDay)).join('')}${day.flights ? `<section class="step-card flight-card"><p class="eyebrow">LUNDI 16 NOVEMBRE</p><h3>Vos vols de retour</h3>${badge('Heure fixe', 'fixed')}<div class="step-body">${flightInfo(day.flights)}</div></section>` : ''}</div><aside>${shortcuts(day)}${hotelCard()}<div class="gentle-note"><strong>Le programme s’adapte à vous</strong>« Terminée » et « Passer cette étape » sont des choix manuels, réversibles et mémorisés ici. L’heure ne coche jamais une étape à votre place.</div></aside></div>${tripNote()}`;
+    <div class="today-layout"><div><div id="next-step">${nextCard(selectedDay)}</div>${weatherCard(day)}${day.steps.map((step, index) => renderStep(step, index, selectedDay)).join('')}${day.flights ? `<section class="step-card flight-card"><p class="eyebrow">LUNDI 16 NOVEMBRE</p><h3>Vos vols de retour</h3>${badge('Heure fixe', 'fixed')}<div class="step-body">${flightInfo(day.flights)}</div></section>` : ''}</div><aside>${shortcuts(day)}${hotelCard()}<div class="gentle-note"><strong>Le programme s’adapte à vous</strong>« Terminée » et « Passer cette étape » sont des choix manuels, réversibles et mémorisés ici. L’heure ne coche jamais une étape à votre place.</div></aside></div>`;
 }
 function renderHistory() {
   main.innerHTML = `<div class="section-heading"><div><p class="eyebrow">LES LIEUX ONT UNE MÉMOIRE</p><h2>Barcelone, au fil des siècles</h2><p>Quelques clés pour regarder autrement les rues que vous traversez.</p></div></div><div class="timeline">${HISTORY.map(chapter => `<article class="history-chapter" id="history-${chapter.id}"><p class="history-era">${chapter.era}</p><h3>${chapter.title}</h3>${chapter.paragraphs.map(paragraph => `<p class="history-text">${escapeHTML(paragraph)}</p>`).join('')}<div class="detail-box"><p>${chapter.detail}</p></div>${sourceLinks(chapter.sources)}<div class="button-row"><a href="#today/${chapter.day}/${chapter.step}" class="btn secondary small">Voir dans le programme ↗</a>${chapter.also ? `<a href="#today/${chapter.also.day}/${chapter.also.step}" class="btn secondary small">${chapter.also.label} ↗</a>` : ''}</div></article>`).join('')}</div>`;
