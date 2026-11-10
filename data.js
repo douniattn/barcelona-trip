@@ -153,9 +153,9 @@ const DAYS = [
     date: '2026-11-15', weekday: 'Dimanche', day: '15', title: 'Sur les hauteurs, puis à Gràcia', subtitle: 'Parc Güell et places de village', icon: '☀', weather: '13 à 20 °C', forecast: 'Éclaircies et quelques averses.', note: 'Le programme suit aussi la météo', phrases: ['tickets', 'available'],
     steps: [
       { id: 'park', time: 'Vers 11 h', minute: 660, label: 'Parc Güell, un quartier rêvé', place: 'park', summary: 'Parc Güell', overviewTime: '11 h', visit: 'park',
-        route: route('praktik', 'park', 'transit', '20 à 25 min', {
+        route: route('praktik', 'park', 'transit', '25 à 35 min', {
           label: 'Bus 24 puis marche',
-          instructions: 'Marchez jusqu’à Pg de Gràcia · Diagonal. Prenez le bus 24 direction El Carmel et descendez à Trav de Dalt · Torrent de les Flors. Rejoignez à pied l’accès côté Carrer de Larrard et Carrer d’Olot. Environ 11 à 16 min à bord, puis la marche, pour environ 20 à 25 min hors attente. Le temps dépend de l’entrée de votre billet et de votre rythme dans la montée.',
+          instructions: 'Marchez jusqu’à Pg de Gràcia · Diagonal. Prenez le bus 24 direction El Carmel et descendez à Trav de Dalt · Torrent de les Flors. Rejoignez à pied l’accès côté Carrer de Larrard et Carrer d’Olot. Environ 11 à 16 min à bord, environ 10 min de marche finale et quelques minutes pour rejoindre l’arrêt : prévoyez 25 à 35 min hors attente. Ce trajet n’est pas garanti sous 25 min. Le bus reste le choix proposé ; comparez le temps complet avant de partir.',
           sources: ['bus24', 'parkAccess', 'parkBusEstimate'],
           entranceVariants: {
             santuari: route('praktik', 'park', 'transit', '25 à 30 min', { label: 'Bus 24 puis marche', instructions: 'Bus 24 depuis Pg de Gràcia · Diagonal, direction El Carmel, jusqu’à Trav de Dalt · La Granja. Continuez à pied vers Avinguda del Santuari de Sant Josep de la Muntanya. Vérifiez l’accès sur votre billet et prévoyez la montée. Estimation hors attente.', sources: ['bus24', 'parkAccess'] }),
