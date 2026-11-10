@@ -1,5 +1,5 @@
 'use strict';
-const CACHE = 'barcelone-a-deux-shell-v10';
+const CACHE = 'barcelone-a-deux-shell-v11';
 const FILES = ['./', './index.html', './styles.css', './data.js', './weather.js', './app.js', './icon.svg'];
 
 self.addEventListener('install', event => {

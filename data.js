@@ -90,9 +90,9 @@ const DAYS = [
         route: route('born', 'muhba', 'walking', '5 à 10 min'),
         body: 'Une étape facultative avant la suite de la balade. Le musée ferme à 19 h. Vérifiez l’accès et le temps disponible avant d’acheter un billet.',
         story: 'Sous la Plaça del Rei, les vestiges de Barcino révèlent la colonie romaine à l’origine de Barcelone. C’est une manière de lire la ville par ses couches, bien avant le quartier gothique.', sources: ['muhba'] },
-      { id: 'gothic', time: 'En début de soirée', minute: 1140, label: 'Le quartier gothique à petits pas', place: 'cathedral', summary: 'Quartier gothique et dîner', overviewTime: 'Soirée',
+      { id: 'gothic', time: 'En début de soirée', minute: 1140, label: 'Quartier gothique et dîner à La Fogata Blue', place: 'cathedral', summary: 'Quartier gothique et dîner à La Fogata Blue', overviewTime: 'Soirée',
         route: route('muhba', 'cathedral', 'walking', '3 à 5 min', { fallback: route('born', 'cathedral', 'walking', '10 à 15 min'), skipId: 'muhba' }),
-        body: 'Rejoignez le parvis de la cathédrale puis dînez dans le quartier. L’observation depuis le parvis est gratuite. Une éventuelle visite intérieure est séparée du budget.',
+        body: 'Rejoignez le parvis de la cathédrale puis dînez à La Fogata Blue. L’observation depuis le parvis est gratuite. Une éventuelle visite intérieure est séparée du budget.',
         observe: 'Comparez la façade de la cathédrale avec Santa Maria del Mar. Leurs apparences ne correspondent pas toutes à la même époque.',
         story: 'La cathédrale est dédiée à la Sainte Croix et à sainte Eulalie. Sa grande façade néogothique a été réalisée à la fin du XIXᵉ siècle à partir de plans du XVᵉ siècle.',
         sources: ['cathedral'], history: 'muslim' }
