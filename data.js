@@ -3,6 +3,9 @@
 const SOURCES = {
   airportBus: ['Aena · Accès en bus', 'https://www.aena.es/en/josep-tarradellas-barcelona-el-prat/getting-there/bus.html'],
   aerob: ['Aerobús · Lignes et arrêts', 'https://aerobusbarcelona.es/?lang=en'],
+  bus24: ['TMB · Bus 24', 'https://www.tmb.cat/en/barcelona/buses/-/lineabus/24'],
+  parkAccess: ['Parc Güell · Accès et marche depuis les arrêts', 'https://parkguell.barcelona/en/planning-your-visit/how-to-get-there'],
+  parkBusEstimate: ['Rome2Rio · Praktik Bakery vers Parc Güell en bus', 'https://www.rome2rio.com/Bus/Praktik-Bakery-Barcelona/Park-G%C3%BCell'],
   cable: ['Téléphérique · Horaires et tarifs', 'https://www.telefericodebarcelona.com/horarios/'],
   cableHistory: ['Téléphérique · Histoire', 'https://www.telefericodebarcelona.com/history-and-technical-data/'],
   maria: ['Santa Maria del Mar · Histoire', 'https://www.santamariadelmar.barcelona/en/history/'],
@@ -27,6 +30,7 @@ const SOURCES = {
   cerda: ['Barcelona Turisme · Plan Cerdà', 'https://www.barcelonaturisme.com/wv3/es/page/5419/barcelona-turisme.html']
 };
 const PLACES = {
+  catalunya: { name: 'Plaça de Catalunya', query: 'Plaça de Catalunya Barcelona' },
   airport: { name: 'Aéroport de Barcelone El Prat', query: 'Aéroport Josep Tarradellas Barcelona El Prat BCN' },
   t1: { name: 'Aéroport BCN · Terminal T1', query: 'Barcelona El Prat Airport Terminal 1 departures' },
   t2: { name: 'Aéroport BCN · Terminal T2', query: 'Barcelona El Prat Airport Terminal 2 departures' },
@@ -64,7 +68,7 @@ const DAYS = [
     steps: [
       { id: 'arrival', time: '10 h 45', minute: 645, timeKind: 'fixed', label: 'Arrivée à Barcelone', place: 'sofitel', summary: 'Arrivée, hôtel et repos', overviewTime: '10 h 45',
         body: 'Horaire d’arrivée du vol communiqué : 10 h 45. Il rejoint le Sofitel et se repose. Vous commencez votre première sortie ensemble à 15 h, pas avant.',
-        route: route('airport', 'sofitel', 'driving', '25 à 40 min', { label: 'Taxi ou Uber', airportAlternative: true }),
+        route: route('airport', 'sofitel', 'driving', '25 à 40 min', { label: 'Taxi ou Uber', airportAlternative: true, reason: 'Trajet long : l’Aerobús seul prend environ 35 min, avant la liaison vers le Sofitel. Vérifiez le trajet complet avant le départ.' }),
         sources: ['airportBus', 'aerob'], details: 'Pour le taxi, rejoignez la station de votre terminal. Pour Uber, suivez le point de prise en charge indiqué dans l’application. Le temps de route commence au départ de l’aéroport et n’inclut pas les bagages.' },
       { id: 'beach', time: '15 h', minute: 900, timeKind: 'fixed', label: 'Barceloneta, au fil de l’eau', place: 'tower', summary: 'Sortie du Sofitel · Barceloneta', overviewTime: '15 h',
         route: route('sofitel', 'tower', 'walking', '20 à 25 min'),
@@ -105,17 +109,17 @@ const DAYS = [
         details: 'Le tarif d’environ 21,40 € par adulte reste à confirmer sur la billetterie. Aucun billet n’est présenté comme réservé.',
         story: 'Le zoo ouvre en 1892 après l’achat d’une collection privée d’animaux par la ville. La collection est alors installée dans le Parc de la Ciutadella.', sources: ['zoo', 'zooHistory'] },
       { id: 'jumuaa', time: '13 h 10 · Arrivée visée à 12 h 50', minute: 790, label: 'Jumuaa dans le Raval', place: 'raval', summary: 'Jumuaa · Arrivée à 12 h 50', overviewTime: '13 h 10', confirm: true, timeKind: 'fixed', free: true,
-        route: route('zoo', 'raval', 'walking', '30 à 40 min', { alternative: route('zoo', 'raval', 'driving', '15 à 25 min', { label: 'Uber' }) }),
+        route: route('zoo', 'raval', 'walking', '30 à 40 min', { alternative: route('zoo', 'raval', 'driving', '15 à 25 min', { label: 'Uber' }), reason: 'La marche reste le choix principal. Avant de choisir Uber, vérifiez les bus : prenez un bus si le trajet complet est inférieur à 25 min. Uber reste une option si marche et bus ou tram demandent chacun au moins 30 min.', checkTransit: true }),
         body: 'Centre Islàmic del Raval, Carrer de la Lluna, 11. Le premier créneau affiché est à 13 h 10, les suivants à 13 h 45 et 14 h 30. Confirmez les horaires auprès de la mosquée, ainsi que l’accès à un espace femmes si besoin.',
         details: 'Si 13 h pile est important pour vous, le Centre Cultural Islàmic Català, Carrer de Rafael Capdevila, affiche 13 h. C’est une autre mosquée et un autre trajet. Vérifiez cet horaire avant de changer de destination.',
         alternativeMosque: true,
         story: 'L’immigration pakistanaise a marqué la vie du Raval à travers ses commerces, ses associations et ses lieux de prière. Cette histoire est celle d’un quartier contemporain et de ses habitants, distincte de la Barcelone sous domination musulmane au Moyen Âge.',
         sources: ['raval', 'alternative', 'migration'], history: 'migration' },
       { id: 'luggage', time: 'Après la prière et le déjeuner', minute: 870, label: 'Déjeuner, puis récupérer les valises', place: 'sofitel', summary: 'Déjeuner · Retour au Sofitel', overviewTime: 'Après',
-        route: route('raval', 'sofitel', 'driving', '15 à 25 min', { label: 'Uber', alternative: route('raval', 'sofitel', 'walking', '35 à 45 min') }),
+        route: route('raval', 'sofitel', 'driving', '15 à 25 min', { label: 'Uber si trajet long', alternative: route('raval', 'sofitel', 'walking', '35 à 45 min'), checkTransit: true, reason: 'À pied : 35 à 45 min. Le temps exact en bus ou tram depuis Carrer de la Lluna n’est pas confirmé. Choisissez le bus si le trajet complet est inférieur à 25 min ; conservez Uber seulement si marche et transports demandent chacun au moins 30 min. Entre 25 et 30 min, privilégiez les transports.' }),
         body: 'Prenez le temps de déjeuner dans le Raval. Revenez ensuite au Sofitel pour récupérer les valises. L’horaire est indicatif et peut glisser.' },
       { id: 'praktik', time: 'Installation à partir de 15 h', minute: 900, timeKind: 'fixed', label: 'Poser vos valises au Praktik Bakery', place: 'praktik', summary: 'Praktik Bakery · Installation', overviewTime: 'Dès 15 h',
-        route: route('sofitel', 'praktik', 'driving', '15 à 25 min', { label: 'Uber' }),
+        route: route('sofitel', 'praktik', 'driving', '15 à 25 min', { label: 'Uber si trajet long', checkTransit: true, reason: 'Avec les valises, comparez le trajet complet, marche vers les arrêts et depuis les arrêts comprise. Aucun trajet de moins de 25 min en bus ou tram n’est confirmé ici. Prenez les transports si le trajet est court ; gardez Uber uniquement si marche et transports prennent chacun au moins 30 min.' }),
         body: 'Votre nouvelle adresse jusqu’au lundi : Carrer de Provença, 279. L’installation est possible à partir de 15 h. Le reste de la journée est libre, sans course contre la montre.' }
     ]
   },
@@ -149,12 +153,20 @@ const DAYS = [
     date: '2026-11-15', weekday: 'Dimanche', day: '15', title: 'Sur les hauteurs, puis à Gràcia', subtitle: 'Parc Güell et places de village', icon: '☀', weather: '13 à 20 °C', forecast: 'Éclaircies et quelques averses.', note: 'Le programme suit aussi la météo', phrases: ['tickets', 'available'],
     steps: [
       { id: 'park', time: 'Vers 11 h', minute: 660, label: 'Parc Güell, un quartier rêvé', place: 'park', summary: 'Parc Güell', overviewTime: '11 h', visit: 'park',
-        route: route('praktik', 'park', 'driving', '15 à 25 min', { label: 'Uber' }),
-        body: 'Vérifiez la météo horaire avant de choisir votre créneau. Choisissez votre entrée Maps selon celle indiquée sur le billet. Prévoyez aussi la marche depuis le point de dépose, non comprise dans le temps de route.',
+        route: route('praktik', 'park', 'transit', '20 à 25 min', {
+          label: 'Bus 24 puis marche',
+          instructions: 'Marchez jusqu’à Pg de Gràcia · Diagonal. Prenez le bus 24 direction El Carmel et descendez à Trav de Dalt · Torrent de les Flors. Rejoignez à pied l’accès côté Carrer de Larrard et Carrer d’Olot. Environ 11 à 16 min à bord, puis la marche, pour environ 20 à 25 min hors attente. Le temps dépend de l’entrée de votre billet et de votre rythme dans la montée.',
+          sources: ['bus24', 'parkAccess', 'parkBusEstimate'],
+          entranceVariants: {
+            santuari: route('praktik', 'park', 'transit', '25 à 30 min', { label: 'Bus 24 puis marche', instructions: 'Bus 24 depuis Pg de Gràcia · Diagonal, direction El Carmel, jusqu’à Trav de Dalt · La Granja. Continuez à pied vers Avinguda del Santuari de Sant Josep de la Muntanya. Vérifiez l’accès sur votre billet et prévoyez la montée. Estimation hors attente.', sources: ['bus24', 'parkAccess'] }),
+            carmel: route('praktik', 'park', 'transit', '30 à 40 min', { label: 'Bus 24 puis marche', instructions: 'Restez dans le bus 24 direction El Carmel jusqu’à C N Catalunya · Park Güell, puis marchez vers l’entrée Carretera del Carmel. Cet accès est plus long que celui de Carrer d’Olot. Vérifiez les arrêts et les perturbations TMB avant le départ.', alternative: route('praktik', 'park', 'driving', '15 à 25 min', { label: 'Uber' }), reason: 'Pour cette entrée, la marche depuis l’hôtel et le trajet en bus dépassent environ 30 min. Uber reste une option, avec la marche finale depuis le point de dépose.', sources: ['bus24', 'parkAccess'] })
+          }
+        }),
+        body: 'Vérifiez la météo horaire avant de choisir votre créneau. Privilégiez le bus 24 puis la marche plutôt qu’Uber. Choisissez l’entrée indiquée sur votre billet : le trajet et sa durée s’adaptent à cet accès. Prévoyez l’attente du bus en plus.',
         parkEntrance: true,
         details: 'S’il pleut pendant le créneau, faites une pause à Gràcia et consultez les conditions du billet. Une modification ou un remboursement ne sont pas garantis.',
         observe: 'Regardez les chemins et l’entrée en imaginant le quartier résidentiel qui devait s’élever sur la colline.',
-        story: 'En 1900, Gaudí commence à aménager pour Eusebi Güell un projet de quartier résidentiel privé. Sur la soixantaine de maisons prévues, seules deux sont construites.', sources: ['park', 'parkConditions', 'gaudi'] },
+        story: 'En 1900, Gaudí commence à aménager pour Eusebi Güell un projet de quartier résidentiel privé. Sur la soixantaine de maisons prévues, seules deux sont construites.', sources: ['park', 'parkConditions', 'gaudi', 'bus24', 'parkAccess', 'parkBusEstimate'] },
       { id: 'gracia', time: 'Après le parc', minute: 810, label: 'Gràcia, d’une place à l’autre', place: 'gracia', summary: 'Gràcia · Déjeuner et flânerie', overviewTime: 'Après',
         route: route('park', 'gracia', 'walking', '25 à 35 min'),
         body: 'Descendez vers la Plaça de la Vila de Gràcia. Déjeuner et balade dans les rues commerçantes, si le temps le permet.',
@@ -168,7 +180,7 @@ const DAYS = [
     date: '2026-11-16', weekday: 'Lundi', day: '16', title: 'Un dernier café, et à bientôt', subtitle: 'Départ ensemble en Uber', icon: '☀', weather: '11 à 20 °C', forecast: 'Quelques éclaircies.', note: 'Aucune visite · Objectif aéroport vers 10 h', phrases: ['terminal'], flights: FLIGHTS,
     steps: [
       { id: 'airport', time: 'Vers 9 h · Arrivée visée vers 10 h', minute: 540, label: 'Départ ensemble en Uber', place: 'airport', summary: 'Uber vers l’aéroport', overviewTime: '9 h',
-        route: route('praktik', 'airport', 'driving', '25 à 45 min', { label: 'Uber' }),
+        route: route('praktik', 'airport', 'driving', '25 à 45 min', { label: 'Uber', reason: 'Exception choisie : vous partez ensemble en Uber le lundi, quelle que soit la durée des transports en commun.' }),
         body: 'Valises et checkout au Praktik Bakery, avec un petit déjeuner à l’hôtel si le temps le permet. Aucune visite aujourd’hui. Partez ensemble vers 9 h pour viser une arrivée à l’aéroport vers 10 h.',
         details: 'Vérifiez les deux cartes d’embarquement avant de choisir le terminal dans Uber. Vueling opère au terminal T1. Ne supposez pas que les deux départs utilisent le même terminal. Les temps de route dépendent du trafic.',
         terminal: true, sources: ['airport'] }

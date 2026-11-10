@@ -25,6 +25,23 @@ Le mode hors ligne fonctionne après une première ouverture sur localhost ou
 HTTPS. Google Maps et les billetteries nécessitent une connexion.
 Après une modification, incrémenter le nom du cache dans `sw.js`.
 
+## Déplacements
+
+Marche pour les petits trajets, bus ou tram pour les parcours de moins de
+25 minutes, et transports encore privilégiés entre 25 et 30 minutes.
+Uber est conditionné à un trajet d’au moins 30 minutes à pied comme en
+transports. Le départ commun du lundi vers l’aéroport reste en Uber,
+sur demande explicite. Pour les comparaisons non confirmées, le carnet
+affiche l’incertitude et un lien de vérification, pas une durée inventée.
+
+Le bus 24 remplace Uber pour le Parc Güell, avec les arrêts, la marche finale,
+les sources et une estimation hors attente. Les variantes d’entrée modifient
+le trajet dans toutes les vues ; l’accès Carretera del Carmel garde Uber en
+option pour ce parcours plus long. Les temps de bus incluent la marche
+d’accès mais pas l’attente. Vérifier les horaires et perturbations le jour même.
+Les liens Google Maps en mode transports peuvent proposer d’autres modes :
+les instructions du carnet précisent les bus à sélectionner.
+
 ## Météo actualisée
 
 `weather.js` interroge Open-Meteo pour les coordonnées de Barcelone, sans clé
